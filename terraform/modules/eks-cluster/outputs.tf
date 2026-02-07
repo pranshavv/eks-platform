@@ -1,0 +1,21 @@
+output "cluster_id" {
+  value       = aws_eks_cluster.this.id
+  description = "The name/id of the EKS cluster"
+}
+
+output "cluster_endpoint" {
+  value       = aws_eks_cluster.this.endpoint
+  description = "Endpoint for your Kubernetes API server"
+}
+
+output "cluster_arn" {
+  value       = aws_eks_cluster.this.arn
+  description = "The Amazon Resource Name (ARN) of the cluster"
+}
+
+output "cluster_certificate_authority_data" {
+  value       = aws_eks_cluster.this.certificate_authority[0].data
+  description = "Base64 encoded certificate data"
+  sensitive   = true
+}
+
