@@ -1,9 +1,7 @@
-data "terraform_remote_state" "core" {
-  backend = "s3"
-  
-  config = {
+terraform {
+  backend "s3" {
     bucket         = "eks-platform-terraform-state-398800073637"
-    key            = "eks-platform/global/terraform.tfstate"
+    key            = "envs/prod/terraform.tfstate"  # Different state file
     region         = "ap-south-1"
     dynamodb_table = "eks-platform-terraform-locks"
     encrypt        = true
