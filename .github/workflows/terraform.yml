@@ -58,13 +58,13 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           script: |
-            const output = `#### Terraform Plan í³–
-            \`\`\`
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\``;
+            const output = `Terraform Plan\n\`\`\`${{ steps.plan.outputs.stdout }}\n\`\`\``;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
             })
+
+
+
