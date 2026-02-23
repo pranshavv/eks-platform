@@ -12,7 +12,7 @@ module "vpc" {
   # NAT Gateway Configuration
   enable_nat_gateway = var.enable_nat_gateway
   single_nat_gateway = var.single_nat_gateway
-
+  cluster_name = var.cluster_name
   common_tags = var.common_tags
 }
 
@@ -49,17 +49,38 @@ module "vpc" {
   count  = var.enable_eks ? 1 : 0
   source = "../../modules/eks-nodes"
 
-  cluster_name    = module.eks_cluster[0].cluster_id
-  node_group_name = "${var.cluster_name}-ng"
+  cluster_name = module.eks_cluster[0].cluster_id
+  subnet_ids   = module.vpc.private_subnet_ids
 
-  subnet_ids = module.vpc.private_subnet_ids
-
-  instance_types = var.node_instance_types
-
-  desired_size = var.node_desired_size
-  min_size     = var.node_min_size
-  max_size     = var.node_max_size
+  system_instance_types = var.system_instance_types
+  system_desired_size   = var.system_desired_size
+  system_min_size       = var.system_min_size
+  system_max_size       = var.system_max_size
 
   common_tags = var.common_tags
+
+  depends_on = [
+    module.vpc,            # ensures NAT + routes exist
+    module.eks_cluster     # ensures control plane exists
+  ]
+}
+
+
+module "karpenter" {
+  count  = var.enable_eks ? 1 : 0
+  source = "../../modules/karpenter"
+
+  cluster_name     = var.cluster_name
+  cluster_endpoint = module.eks_cluster[0].cluster_endpoint
+  oidc_provider_arn = module.eks_cluster[0].oidc_provider_arn
+  oidc_provider_url = module.eks_cluster[0].oidc_provider_url
+  node_role_arn    = module.eks_nodes[0].node_role_arn
+
+  common_tags = var.common_tags
+
+  depends_on = [
+    module.eks_cluster,
+    module.eks_nodes
+  ]
 }
 

@@ -11,3 +11,30 @@ resource "aws_vpc" "main" {
     }
   )
 }
+resource "aws_security_group" "karpenter_nodes" {
+  name        = "${var.cluster_name}-karpenter-nodes"
+  description = "Security group for nodes launched by Karpenter"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = true
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(
+    var.common_tags,
+    {
+      Name                         = "${var.cluster_name}-karpenter-nodes"
+      "karpenter.sh/discovery"     = var.cluster_name
+    }
+  )
+}

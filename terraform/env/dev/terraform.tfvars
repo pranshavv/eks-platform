@@ -41,10 +41,10 @@ single_nat_gateway = true
 
 cluster_name    = "eks-platform-dev"
 cluster_version = "1.29"
-enable_eks      = true
+enable_eks      = false
 
 
-node_instance_types = ["t3.micro"]
-node_desired_size  = 1
-node_min_size      = 1
-node_max_size      = 1
+system_instance_types = ["t3.medium"]
+system_desired_size   = 2
+system_min_size       = 2
+system_max_size       = 2

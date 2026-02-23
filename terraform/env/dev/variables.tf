@@ -69,22 +69,26 @@ variable "enable_eks" {
   default     = false
 }
 
-variable "node_instance_types" {
+variable "system_instance_types" {
   type        = list(string)
-  description = "Instance types for EKS worker nodes"
+  description = "Instance types for system node group"
+  default     = ["t3.medium"]
 }
 
-variable "node_desired_size" {
+variable "system_desired_size" {
   type        = number
-  description = "Desired number of EKS worker nodes"
+  description = "Desired number of system nodes"
+  default     = 2
 }
 
-variable "node_min_size" {
+variable "system_min_size" {
   type        = number
-  description = "Minimum number of EKS worker nodes"
+  description = "Minimum number of system nodes"
+  default     = 2
 }
 
-variable "node_max_size" {
+variable "system_max_size" {
   type        = number
-  description = "Maximum number of EKS worker nodes"
+  description = "Maximum number of system nodes"
+  default     = 2
 }

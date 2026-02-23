@@ -1,11 +1,6 @@
 variable "cluster_name" {
   type        = string
-  description = "EKS cluster name to attach this node group to"
-}
-
-variable "node_group_name" {
-  type        = string
-  description = "Name of the EKS node group"
+  description = "EKS cluster name to attach node groups to"
 }
 
 variable "subnet_ids" {
@@ -13,27 +8,33 @@ variable "subnet_ids" {
   description = "Private subnet IDs for worker nodes"
 }
 
-variable "instance_types" {
+# ── System Node Group Variables ─────────────────────────────────────────────
+
+variable "system_instance_types" {
   type        = list(string)
-  description = "EC2 instance types for worker nodes"
+  description = "Instance types for system node group (runs Karpenter, ArgoCD, Prometheus)"
+  default     = ["t3.medium"]
 }
 
-variable "desired_size" {
+variable "system_desired_size" {
   type        = number
-  description = "Desired number of worker nodes"
+  description = "Desired number of system nodes — keep same as min for stability"
+  default     = 2
 }
 
-variable "min_size" {
+variable "system_min_size" {
   type        = number
-  description = "Minimum number of worker nodes"
+  description = "Minimum system nodes — never goes below this"
+  default     = 2
 }
 
-variable "max_size" {
+variable "system_max_size" {
   type        = number
-  description = "Maximum number of worker nodes"
+  description = "Maximum system nodes — fixed, we don't scale system nodes"
+  default     = 2
 }
 
 variable "common_tags" {
   type        = map(string)
-  description = "Common tags applied to node group resources"
+  description = "Common tags applied to all node group resources"
 }

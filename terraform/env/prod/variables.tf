@@ -46,3 +46,8 @@ variable "single_nat_gateway" {
   description = "Use single NAT Gateway instead of one per AZ"
   default     = true
 }
+
+variable "cluster_name" {
+  type        = string
+  description = "Name of the EKS cluster"
+}

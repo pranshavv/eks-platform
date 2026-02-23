@@ -1,0 +1,31 @@
+apiVersion: karpenter.k8s.aws/v1beta1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  # Karpenter fetches latest EKS optimized AMI automatically via SSM
+  # This is why we gave ssm:GetParameter permission in IAM policy
+  amiFamily: AL2
+
+  # Your node IAM role name — NOT the ARN, just the name
+  # This is the same role from eks-nodes module
+  role: "eks-platform-dev-node-role"
+
+  # Karpenter will only launch into subnets tagged with this
+  # Your private subnets in subnet.tf already have these tags
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "eks-platform-dev"
+
+  # Karpenter will only use security groups tagged with this
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "eks-platform-dev"
+
+  # Block device mapping — root volume for the node
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 20Gi
+        volumeType: gp3
+        deleteOnTermination: true

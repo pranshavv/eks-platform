@@ -19,3 +19,10 @@ output "cluster_certificate_authority_data" {
   sensitive   = true
 }
 
+output "oidc_provider_arn" {
+  value = aws_iam_openid_connect_provider.eks.arn
+}
+
+output "oidc_provider_url" {
+  value = aws_iam_openid_connect_provider.eks.url
+}

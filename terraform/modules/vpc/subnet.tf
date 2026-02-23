@@ -11,6 +11,7 @@ resource "aws_subnet" "public_a" {
       Name                                     = "eks-public-${var.azs[0]}"
       "kubernetes.io/cluster/eks-platform"     = "shared"
       "kubernetes.io/role/elb"                 = "1"
+      "karpenter.sh/discovery"                 = var.cluster_name
     }
   )
 }
@@ -28,6 +29,7 @@ resource "aws_subnet" "public_b" {
       Name                                     = "eks-public-${var.azs[1]}"
       "kubernetes.io/cluster/eks-platform"     = "shared"
       "kubernetes.io/role/elb"                 = "1"
+      "karpenter.sh/discovery"                 = var.cluster_name
     }
   )
 }
@@ -44,6 +46,7 @@ resource "aws_subnet" "private_a" {
       Name                                     = "eks-private-${var.azs[0]}"
       "kubernetes.io/cluster/eks-platform"     = "shared"
       "kubernetes.io/role/internal-elb"        = "1"
+      "karpenter.sh/discovery"                 = var.cluster_name
     }
   )
 }
@@ -60,6 +63,7 @@ resource "aws_subnet" "private_b" {
       Name                                     = "eks-private-${var.azs[1]}"
       "kubernetes.io/cluster/eks-platform"     = "shared"
       "kubernetes.io/role/internal-elb"        = "1"
+      "karpenter.sh/discovery"                 = var.cluster_name
     }
   )
 }

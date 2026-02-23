@@ -44,3 +44,8 @@ variable "single_nat_gateway" {
   description = "Use single NAT Gateway instead of one per AZ (cost optimization)"
   default     = true
 }
+
+variable "cluster_name" {
+  description = "EKS cluster name used for Karpenter discovery tags on subnets and security groups"
+  type        = string
+}

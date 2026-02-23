@@ -9,9 +9,10 @@ module "vpc" {
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
 
-  # NAT Gateway Configuration
   enable_nat_gateway = var.enable_nat_gateway
   single_nat_gateway = var.single_nat_gateway
+
+  cluster_name = var.cluster_name    
 
   common_tags = var.common_tags
 }

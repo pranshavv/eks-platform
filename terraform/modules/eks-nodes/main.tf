@@ -1,14 +1,14 @@
+# ── IAM Role (shared by both node groups) ──────────────────────────────────
+
 resource "aws_iam_role" "node" {
   name = "${var.cluster_name}-node-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+      Action    = "sts:AssumeRole"
     }]
   })
 
@@ -30,23 +30,36 @@ resource "aws_iam_role_policy_attachment" "ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-resource "aws_eks_node_group" "this" {
-  cluster_name    = var.cluster_name
-  node_group_name = var.node_group_name
-  node_role_arn  = aws_iam_role.node.arn
-  subnet_ids     = var.subnet_ids
+# ── System Node Group ───────────────────────────────────────────────────────
+# Runs: Karpenter, CoreDNS, kube-proxy, ArgoCD, Prometheus
+# Fixed size — never scales down
+# Tainted so app pods never land here
 
-  instance_types = var.instance_types
+resource "aws_eks_node_group" "system" {
+  cluster_name    = var.cluster_name
+  node_group_name = "${var.cluster_name}-system-ng"
+  node_role_arn   = aws_iam_role.node.arn
+  subnet_ids      = var.subnet_ids
+  instance_types  = var.system_instance_types
 
   scaling_config {
-    desired_size = var.desired_size
-    min_size     = var.min_size
-    max_size     = var.max_size
+    desired_size = var.system_desired_size
+    min_size     = var.system_min_size
+    max_size     = var.system_max_size
+  }
+
+  taint {
+    key    = "dedicated"
+    value  = "system"
+    effect = "NO_SCHEDULE"
+  }
+
+  labels = {
+    role = "system"
   }
 
   capacity_type = "ON_DEMAND"
-
-  tags = var.common_tags
+  tags          = var.common_tags
 
   depends_on = [
     aws_iam_role_policy_attachment.worker_node,
