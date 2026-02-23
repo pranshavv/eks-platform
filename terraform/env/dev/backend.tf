@@ -6,4 +6,4 @@ terraform {
     dynamodb_table = "eks-platform-terraform-locks"
     encrypt        = true
   }
-}
+} 
