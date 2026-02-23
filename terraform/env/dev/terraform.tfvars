@@ -11,14 +11,14 @@ azs = [
 
 # Public Subnets (MUST match current subnets exactly)
 public_subnet_cidrs = [
-  "10.0.0.0/24",   # public_a
-  "10.0.1.0/24"    # public_b
+  "10.0.0.0/24", # public_a
+  "10.0.1.0/24"  # public_b
 ]
 
 # Private Subnets (MUST match current subnets exactly)
 private_subnet_cidrs = [
-  "10.0.10.0/24",  # private_a
-  "10.0.11.0/24"   # private_b
+  "10.0.10.0/24", # private_a
+  "10.0.11.0/24"  # private_b
 ]
 
 # Tags

@@ -12,7 +12,7 @@ module "vpc" {
   enable_nat_gateway = var.enable_nat_gateway
   single_nat_gateway = var.single_nat_gateway
 
-  cluster_name = var.cluster_name    
+  cluster_name = var.cluster_name
 
   common_tags = var.common_tags
 }
