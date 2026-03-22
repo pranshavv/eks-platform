@@ -1,0 +1,64 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: inventory-slos
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  groups:
+    - name: inventory.slos
+      interval: 30s
+      rules:
+        # ── Error Rate SLO ───────────────────────────────────────────
+        # Alert if error rate goes above 1% (SLO: 99% success rate)
+        - alert: HighErrorRate
+          expr: |
+            sum(rate(http_requests_total{job="inventory-backend", status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="inventory-backend"}[5m])) > 0.01
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Error budget burning fast"
+            description: "Error rate is {{ $value | humanizePercentage }} — SLO breach imminent"
+
+        # ── Latency SLO ──────────────────────────────────────────────
+        # Alert if p99 latency goes above 500ms
+        - alert: HighLatency
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{job="inventory-backend"}[5m])) by (le)
+            ) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "p99 latency above 500ms"
+            description: "p99 latency is {{ $value }}s"
+
+        # ── Pod Failure Alert ─────────────────────────────────────────
+        # Alert if any inventory pod is crash looping
+        - alert: PodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{namespace="inventory"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod crash looping in inventory namespace"
+            description: "Pod {{ $labels.pod }} is restarting repeatedly"
+
+        # ── Node Pressure Alert ───────────────────────────────────────
+        # Alert if node memory is above 85%
+        - alert: NodeMemoryPressure
+          expr: |
+            (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+            / node_memory_MemTotal_bytes > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node memory above 85%"
+            description: "Node {{ $labels.instance }} memory usage is {{ $value | humanizePercentage }}"

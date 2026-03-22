@@ -95,3 +95,56 @@ resource "aws_iam_role_policy_attachment" "karpenter_controller" {
   role       = aws_iam_role.karpenter_controller.name
   policy_arn = aws_iam_policy.karpenter_controller.arn
 }
+
+# # ── Karpenter Helm Install ──────────────────────────────────────────────────
+# # Actually installs Karpenter onto the cluster via Helm
+# # IAM + IRSA above must exist before this runs
+
+# resource "helm_release" "karpenter" {
+#   name       = "karpenter"
+#   namespace  = "karpenter"
+#   repository = "oci://public.ecr.aws/karpenter"
+#   chart      = "karpenter"
+#   version    = "v0.37.0"
+
+#   create_namespace = true
+
+#   set {
+#     name  = "settings.clusterName"
+#     value = var.cluster_name
+#   }
+
+#   set {
+#     name  = "settings.clusterEndpoint"
+#     value = var.cluster_endpoint
+#   }
+
+#   set {
+#     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+#     value = aws_iam_role.karpenter_controller.arn
+#   }
+
+#   set {
+#     name  = "controller.resources.requests.cpu"
+#     value = "250m"
+#   }
+
+#   set {
+#     name  = "controller.resources.requests.memory"
+#     value = "256Mi"
+#   }
+
+#   set {
+#     name  = "controller.resources.limits.cpu"
+#     value = "500m"
+#   }
+
+#   set {
+#     name  = "controller.resources.limits.memory"
+#     value = "512Mi"
+#   }
+
+#   depends_on = [
+#     aws_iam_role_policy_attachment.karpenter_controller
+#   ]
+# }

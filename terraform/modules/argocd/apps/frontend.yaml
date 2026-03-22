@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/pranshavv/eks-platform.git
+    targetRevision: main
+    path: k8s/frontend
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: inventory
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+# ---
+
+# ** this structure:**
+
+# The root app watches `argocd/apps/` — when you push any new YAML there, ArgoCD automatically picks it up and creates a new child app. Each child app watches its own folder in `k8s/`. So the flow is:
+
+# push to `k8s/backend/` → ArgoCD detects change → applies to cluster → new version live.
+
+# That's exactly what *"PR-driven deployments and Git-based rollbacks"* means on your resume. To rollback you just revert the git commit — ArgoCD will sync back to the previous state automatically.
+
+# ---
+
