@@ -1,3 +1,28 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.12"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.14"
+    }
+  }
+}
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
 provider "helm" {
   kubernetes {
     host                   = try(module.eks_cluster[0].cluster_endpoint, "")
@@ -15,5 +40,24 @@ provider "helm" {
         "ap-south-1"
       ]
     }
+  }
+}
+
+provider "kubectl" {
+  host                   = try(module.eks_cluster[0].cluster_endpoint, "")
+  cluster_ca_certificate = try(base64decode(module.eks_cluster[0].cluster_certificate_authority_data), "")
+  load_config_file       = false
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args = [
+      "eks",
+      "get-token",
+      "--cluster-name",
+      var.cluster_name,
+      "--region",
+      "ap-south-1"
+    ]
   }
 }

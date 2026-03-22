@@ -79,6 +79,19 @@ module "karpenter" {
   ]
 }
 
+module "argocd" {
+  count  = var.enable_eks ? 1 : 0
+  source = "../../modules/argocd"
+
+  depends_on_eks = module.eks_nodes
+
+  depends_on = [
+    module.eks_cluster,
+    module.eks_nodes,
+    module.karpenter
+  ]
+}
+
 
 
 
