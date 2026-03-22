@@ -30,8 +30,8 @@ common_tags = {
 
 # NAT Gateway Configuration
 # Set enable_nat_gateway = true when you need private subnet internet access
-enable_nat_gateway = false
-single_nat_gateway = true
+enable_nat_gateway = true
+single_nat_gateway = false
 
 # ==============================================================================
 # EKS Configuration (disabled to save costs)
