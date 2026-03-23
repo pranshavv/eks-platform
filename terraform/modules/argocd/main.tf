@@ -1,7 +1,4 @@
 # ── ArgoCD Helm Install ──────────────────────────────────────────────────────
-# Installs ArgoCD onto the cluster via Helm
-# Runs in its own namespace — completely isolated from app workloads
-
 resource "helm_release" "argocd" {
   name       = "argocd"
   namespace  = "argocd"
@@ -45,11 +42,65 @@ resource "helm_release" "argocd" {
   depends_on = [var.depends_on_eks]
 }
 
-# ── ArgoCD Root App ──────────────────────────────────────────────────────────
-# This is the App-of-Apps pattern
-# One root app watches argocd/apps/ folder
-# It automatically creates child apps for backend, frontend, postgres
+# ── NGINX Ingress Controller ─────────────────────────────────────────────────
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress"
+  namespace  = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  version    = "4.10.0"
 
+  create_namespace = true
+
+  values = [
+    <<-EOT
+    controller:
+      service:
+        type: LoadBalancer
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "250m"
+          memory: "256Mi"
+    EOT
+  ]
+
+  depends_on = [var.depends_on_eks]
+}
+
+# ── cert-manager ─────────────────────────────────────────────────────────────
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  namespace  = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  version    = "v1.14.4"
+
+  create_namespace = true
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
+  values = [
+    <<-EOT
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "100m"
+        memory: "128Mi"
+    EOT
+  ]
+
+  depends_on = [var.depends_on_eks]
+}
+
+# ── ArgoCD Root App ──────────────────────────────────────────────────────────
 resource "kubectl_manifest" "argocd_root_app" {
   yaml_body = <<-YAML
     apiVersion: argoproj.io/v1alpha1
@@ -76,5 +127,9 @@ resource "kubectl_manifest" "argocd_root_app" {
           - CreateNamespace=true
   YAML
 
-  depends_on = [helm_release.argocd]
+  depends_on = [
+    helm_release.argocd,
+    helm_release.nginx_ingress,
+    helm_release.cert_manager
+  ]
 }
